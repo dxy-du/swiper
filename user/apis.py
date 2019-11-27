@@ -1,10 +1,10 @@
-from django.http import JsonResponse
 from django.core.cache import cache
 
 from common import stat
 from user import logics
 from user.models import User
 from user.models import Profile
+from libs.http import render_json
 
 
 def get_vcode(request):
@@ -12,9 +12,9 @@ def get_vcode(request):
     phonenum = request.GET.get('phonenum')
     status = logics.send_vcode(phonenum)
     if status:
-        return JsonResponse({'code': stat.OK, 'data': None})
+        return render_json()
     else:
-        return JsonResponse({'code': stat.SEND_SMS_ERR, 'data': None})
+        return render_json(code=stat.SEND_SMS_ERR)
 
 
 def submit_vcode(request):
@@ -33,15 +33,15 @@ def submit_vcode(request):
 
         # 执行登陆过程
         request.session['uid'] = user.id
-        return JsonResponse({'code': stat.OK, 'data': user.to_dict()})
+        return render_json(user.to_dict())
     else:
-        return JsonResponse({'code': stat.VCODE_ERR, 'data': None})
+        return render_json(code=stat.VCODE_ERR)
 
 
 def get_profile(request):
     '''获取个人资料'''
     profile, _ = Profile.objects.get_or_create(id=request.uid)
-    return JsonResponse({'code': stat.OK, 'data': profile.to_dict()})
+    return render_json(profile.to_dict())
 
 
 def set_profile(request):
