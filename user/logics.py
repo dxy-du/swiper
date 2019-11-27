@@ -1,6 +1,7 @@
 import random
 
 import requests
+from django.core.cache import cache
 
 from swiper import config
 
@@ -34,5 +35,6 @@ def send_vcode(mobile):
     if response.status_code == 200:
         result = response.json()
         if result['msg'] == 'OK':
+            cache.set('Vcode-%s' % mobile, vcode, 180)  # 将验证码写入缓存，保存 3 分钟
             return True
     return False
