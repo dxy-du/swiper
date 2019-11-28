@@ -106,3 +106,4 @@ venv.bak/
 # Custom
 .idea/
 .DS_Store
+.qiniu_pythonsdk_hostscache.json

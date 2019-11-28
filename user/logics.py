@@ -38,3 +38,13 @@ def send_vcode(mobile):
             cache.set('Vcode-%s' % mobile, vcode, 180)  # 将验证码写入缓存，保存 3 分钟
             return True
     return False
+
+
+def save_avatar(uid, avatar_file):
+    '''将个人形象保存到本地'''
+    filename = 'Avatar-%s' % uid
+    filepath = '/tmp/%s' % filename
+    with open(filepath, 'wb') as fp:
+        for chunk in avatar_file.chunks():
+            fp.write(chunk)
+    return filename, filepath
