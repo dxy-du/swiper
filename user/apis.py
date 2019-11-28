@@ -1,5 +1,3 @@
-import os
-
 from django.core.cache import cache
 
 from common import stat
@@ -9,7 +7,6 @@ from user.models import Profile
 from user.forms import UserForm
 from user.forms import ProfileForm
 from libs.http import render_json
-from libs.qn_cloud import upload_to_qiniu
 
 
 def get_vcode(request):
@@ -82,10 +79,5 @@ def upload_avatar(request):
     4. 删除本地文件
     '''
     avatar_file = request.FILES.get('avatar')
-
-    filename, filepath = logics.save_avatar(request.uid, avatar_file)  # 文件保存到本地
-    avatar_url = upload_to_qiniu(filename, filepath)  # 文件上传到七牛
-    User.objects.filter(id=request.uid).update(avatar=avatar_url)  # 保存 URL
-    os.remove(filepath)  # 删除本地临时文件
-
+    logics.upload_avatar.delay(request.uid, avatar_file)
     return render_json()
