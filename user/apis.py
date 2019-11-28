@@ -4,6 +4,8 @@ from common import stat
 from user import logics
 from user.models import User
 from user.models import Profile
+from user.forms import UserForm
+from user.forms import ProfileForm
 from libs.http import render_json
 
 
@@ -45,8 +47,26 @@ def get_profile(request):
 
 
 def set_profile(request):
-    '修改个人资料'
-    return
+    '''修改个人资料'''
+    user_form = UserForm(request.POST)
+    profile_form = ProfileForm(request.POST)
+
+    # 检查数据有效性
+    if not user_form.is_valid():
+        return render_json(user_form.errors, stat.USER_FORM_ERR)
+    if not profile_form.is_valid():
+        return render_json(profile_form.errors, stat.PROFILE_FORM_ERR)
+
+    # 保存数据
+    User.objects.filter(id=request.uid).update(**user_form.cleaned_data)
+    Profile.objects.filter(id=request.uid).update(**profile_form.cleaned_data)
+
+    # 文强 + 程超 的思路
+    # user = User.objects.get(id=request.uid)
+    # user.__dict__.update(user_form.cleaned_data)
+    # user.save()
+
+    return render_json()
 
 
 def upload_avatar(request):
