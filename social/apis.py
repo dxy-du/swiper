@@ -11,7 +11,9 @@ def rcmd_users(request):
 
 def like(request):
     '''右滑：喜欢'''
-    return render_json()
+    sid = int(request.POST.get('sid'))
+    is_matched = logics.like_someone(request.uid, sid)
+    return render_json({'is_matched': is_matched})
 
 
 def superlike(request):
