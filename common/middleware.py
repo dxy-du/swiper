@@ -16,6 +16,13 @@ class AuthMiddleware(MiddlewareMixin):
         if request.path not in self.path_white_list:
             uid = request.session.get('uid')
             if not uid:
-                return render_json(code=stat.LOGIN_REQUIRED)
+                return render_json(code=stat.LoginRequired.code)
             else:
                 request.uid = uid
+
+
+class LogicErrMiddleware(MiddlewareMixin):
+    '''逻辑异常处理中间件'''
+    def process_exception(self, request, exception):
+        if isinstance(exception, stat.LogicError):
+            return render_json(exception.data, exception.code)

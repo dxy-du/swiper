@@ -50,7 +50,7 @@ def rcmd(uid):
 def like_someone(uid, sid):
     '''喜欢某人'''
     # 添加滑动记录
-    Swiped.objects.create(uid=uid, sid=sid, stype='like')
+    Swiped.swipe(uid, sid, 'like')
 
     # 将 sid 从自己的优先推荐队列中删除
     rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)
@@ -67,7 +67,7 @@ def like_someone(uid, sid):
 def superlike_someone(uid, sid):
     '''超级喜欢某人'''
     # 添加滑动记录
-    Swiped.objects.create(uid=uid, sid=sid, stype='superlike')
+    Swiped.swipe(uid, sid, 'superlike')
 
     # 将 sid 从自己的优先推荐队列中删除
     rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)
@@ -84,3 +84,12 @@ def superlike_someone(uid, sid):
         # 对方没有滑动过自己，需要将将自己的 uid 添加到对方的 “优先推荐队列”
         rds.rpush(keys.FIRST_RCMD_K % sid, uid)
         return False
+
+
+def dislike_someone(uid, sid):
+    '''不喜欢的操作'''
+    # 添加滑动记录
+    Swiped.swipe(uid, sid, 'dislike')
+
+    # 将 sid 从自己的优先推荐队列中删除
+    rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)

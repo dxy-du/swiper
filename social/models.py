@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.utils import IntegrityError
+
+from common import stat
 
 
 class Swiped(models.Model):
@@ -12,6 +15,21 @@ class Swiped(models.Model):
     sid = models.IntegerField(verbose_name='被滑动者的 ID')
     stype = models.CharField(max_length=10, choices=STYPE, verbose_name='滑动类型')
     stime = models.DateTimeField(auto_now_add=True, verbose_name='滑动时间')
+
+    class Meta:
+        unique_together = [['uid', 'sid']]  # uid 和 sid 联合唯一，防止重复滑动
+
+    @classmethod
+    def swipe(cls, uid, sid, stype):
+        '''添加一个滑动记录'''
+        # 检查滑动类型
+        if stype not in ['like', 'superlike', 'dislike']:
+            raise stat.StypeErr
+
+        try:
+            cls.objects.create(uid=uid, sid=sid, stype=stype)
+        except IntegrityError:
+            raise stat.ReswipeErr
 
     @classmethod
     def is_liked(cls, uid, sid):
