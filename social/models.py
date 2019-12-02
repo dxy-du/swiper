@@ -15,8 +15,20 @@ class Swiped(models.Model):
 
     @classmethod
     def is_liked(cls, uid, sid):
-        '''检查是否喜欢过对方'''
-        return cls.objects.filter(uid=uid, sid=sid, stype__in=['like', 'superlike']).exists()
+        '''
+        检查是否喜欢过对方
+
+        Returns:
+            True : 喜欢
+            False: 不喜欢
+            None : 没滑过
+        '''
+        like_types = ['like', 'superlike']
+        try:
+            swp = cls.objects.get(uid=uid, sid=sid)
+            return swp.stype in like_types
+        except cls.DoesNotExist:
+            return None
 
 
 class Friend(models.Model):
