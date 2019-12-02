@@ -52,6 +52,9 @@ def like_someone(uid, sid):
     # 添加滑动记录
     Swiped.objects.create(uid=uid, sid=sid, stype='like')
 
+    # 将 sid 从自己的优先推荐队列中删除
+    rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)
+
     # 检查对方有没有右滑或者上滑过自己
     if Swiped.is_liked(sid, uid):
         # 如果对方喜欢过自己，匹配成好友
@@ -65,6 +68,9 @@ def superlike_someone(uid, sid):
     '''超级喜欢某人'''
     # 添加滑动记录
     Swiped.objects.create(uid=uid, sid=sid, stype='superlike')
+
+    # 将 sid 从自己的优先推荐队列中删除
+    rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)
 
     # 检查对方有没有右滑或者上滑过自己
     liked_me = Swiped.is_liked(sid, uid)
