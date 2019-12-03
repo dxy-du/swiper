@@ -28,3 +28,5 @@ UserFormErr = gen_logic_err('UserFormErr', 1003)        # 用户表单错误
 ProfileFormErr = gen_logic_err('ProfileFormErr', 1004)  # 资料表单错误
 StypeErr = gen_logic_err('StypeErr', 1005)              # 滑动类型错误
 ReswipeErr = gen_logic_err('ReswipeErr', 1006)          # 重复滑动一个人
+RewindLimit = gen_logic_err('RewindLimit', 1007)        # 反悔次数达到限制
+RewindTimeout = gen_logic_err('RewindTimeout', 1008)    # 反悔超时

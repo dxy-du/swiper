@@ -62,3 +62,9 @@ class Friend(models.Model):
         '''创建好友关系'''
         uid1, uid2 = (uid2, uid1) if uid1 > uid2 else (uid1, uid2)
         cls.objects.create(uid1=uid1, uid2=uid2)
+
+    @classmethod
+    def break_off(cls, uid1, uid2):
+        '''绝交'''
+        uid1, uid2 = (uid2, uid1) if uid1 > uid2 else (uid1, uid2)
+        cls.objects.filter(uid1=uid1, uid2=uid2).delete()

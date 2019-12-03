@@ -31,6 +31,15 @@ def dislike(request):
 
 
 def rewind(request):
+    '''
+    反悔操作
+
+    传参处理:
+        1. 客户端传来的任何东西都不可信
+        2. 所有客户端传来的东西，都需要经过验证才可以使用
+        3. 能不依赖客户端的数据，尽量不让客户端传
+    '''
+    logics.rewind_swipe(request.uid)
     return render_json()
 
 
