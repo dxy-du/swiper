@@ -14,7 +14,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "swiper.settings")
 django.setup()
 
 from user.models import User
-# from vip.models import Vip, Permission, VipPermRelation
+from vip.models import Vip, Permission, VipPermRelation
 
 
 last_names = (
@@ -80,7 +80,7 @@ def init_permission():
         ('rewind',        '反悔功能'),
         ('anylocation',   '任意更改定位'),
         ('unlimit_like',  '无限喜欢次数'),
-        ('show_liked_me', '查看喜欢过我的人'),
+        ('who_liked_me',  '查看喜欢过我的人'),
     )
 
     for name, desc in permissions:
@@ -118,7 +118,7 @@ def create_vip_perm_relations():
     rewind = Permission.objects.get(name='rewind')
     anylocation = Permission.objects.get(name='anylocation')
     unlimit_like = Permission.objects.get(name='unlimit_like')
-    show_liked_me = Permission.objects.get(name='show_liked_me')
+    who_liked_me = Permission.objects.get(name='who_liked_me')
 
     # 给 VIP 1 分配权限
     VipPermRelation.objects.get_or_create(vip_id=vip1.id, perm_id=vipflag.id)
@@ -135,11 +135,11 @@ def create_vip_perm_relations():
     VipPermRelation.objects.get_or_create(vip_id=vip3.id, perm_id=rewind.id)
     VipPermRelation.objects.get_or_create(vip_id=vip3.id, perm_id=anylocation.id)
     VipPermRelation.objects.get_or_create(vip_id=vip3.id, perm_id=unlimit_like.id)
-    VipPermRelation.objects.get_or_create(vip_id=vip3.id, perm_id=show_liked_me.id)
+    VipPermRelation.objects.get_or_create(vip_id=vip3.id, perm_id=who_liked_me.id)
 
 
 if __name__ == '__main__':
-    create_robots(10000)
-    # init_permission()
-    # init_vip()
-    # create_vip_perm_relations()
+    # create_robots(10000)
+    init_permission()
+    init_vip()
+    create_vip_perm_relations()

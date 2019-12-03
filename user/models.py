@@ -1,6 +1,10 @@
 '''程序设计要有前瞻性，但是不要过早优化'''
 
+import datetime
+
 from django.db import models
+
+from vip.models import Vip
 
 
 class User(models.Model):
@@ -24,11 +28,24 @@ class User(models.Model):
     location = models.CharField(max_length=15, choices=LOCATION, default='上海', verbose_name='常居地')
     avatar = models.CharField(max_length=256, verbose_name='个人形象')
 
+    vip_id = models.IntegerField(default=1, verbose_name='用户对应的会员 ID')
+    vip_end = models.DateTimeField(default='3000-1-1', verbose_name='会员过期时间')
+
     @property
     def profile(self):
         if not hasattr(self, '_profile'):
             self._profile, _ = Profile.objects.get_or_create(id=self.id)
         return self._profile
+
+    @property
+    def vip(self):
+        if not hasattr(self, '_vip'):
+            self._vip = Vip.objects.get(id=self.vip_id)
+        return self._vip
+
+    def is_vip_expired(self):
+        '''检查自己的会员是否已经过期'''
+        return datetime.datetime.now() >= self.vip_end
 
     def to_dict(self):
         return {
