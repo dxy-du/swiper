@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.db.utils import IntegrityError
 
 from common import stat
@@ -68,3 +69,13 @@ class Friend(models.Model):
         '''绝交'''
         uid1, uid2 = (uid2, uid1) if uid1 > uid2 else (uid1, uid2)
         cls.objects.filter(uid1=uid1, uid2=uid2).delete()
+
+    @classmethod
+    def friend_id_list(cls, uid):
+        '''获取自己好友 ID 列表'''
+        fid_list = []
+        condition = Q(uid1=uid) | Q(uid2=uid)
+        for frd in cls.objects.filter(condition):
+            fid = frd.uid1 if uid == frd.uid2 else frd.uid2
+            fid_list.append(fid)
+        return fid_list

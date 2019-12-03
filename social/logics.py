@@ -132,3 +132,23 @@ def rewind_swipe(uid):
 
     # 更新反悔次数
     rds.set(rewind_k, rewind_times + 1, 86400)
+
+
+def users_liked_me(uid):
+    '''
+    喜欢过或者超级喜欢过我的用户
+
+    查询条件：
+        - 我还没有滑过对方
+        - 对方右滑或者上滑过自己
+    '''
+    # 取出已经滑过的人的 ID
+    sid_list = Swiped.objects.filter(uid=uid).values_list('sid', flat=True)
+
+    like_types = ['like', 'superlike']
+    uid_list = Swiped.objects.filter(sid=uid, stype__in=like_types)\
+                             .exclude(uid__in=sid_list)\
+                             .values_list('uid', flat=True)
+
+    users = User.objects.filter(id__in=uid_list)
+    return users
