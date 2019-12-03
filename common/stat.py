@@ -30,3 +30,5 @@ StypeErr = gen_logic_err('StypeErr', 1005)              # 滑动类型错误
 ReswipeErr = gen_logic_err('ReswipeErr', 1006)          # 重复滑动一个人
 RewindLimit = gen_logic_err('RewindLimit', 1007)        # 反悔次数达到限制
 RewindTimeout = gen_logic_err('RewindTimeout', 1008)    # 反悔超时
+VipExpired = gen_logic_err('VipExpired', 1009)          # Vip 已过期
+PermRequired = gen_logic_err('PermRequired', 1010)      # 没有该权限
