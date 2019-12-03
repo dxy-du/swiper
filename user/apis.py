@@ -1,6 +1,7 @@
 from django.core.cache import cache
 
 from common import stat
+from common import keys
 from user import logics
 from user.models import User
 from user.models import Profile
@@ -16,7 +17,7 @@ def get_vcode(request):
     if status:
         return render_json()
     else:
-        return render_json(code=stat.SEND_SMS_ERR)
+        raise stat.SendSmsErr
 
 
 def submit_vcode(request):
@@ -24,7 +25,7 @@ def submit_vcode(request):
     phonenum = request.POST.get('phonenum')
     vcode = request.POST.get('vcode')
 
-    cached_vcode = cache.get('Vcode-%s' % phonenum)  # 取出缓存的验证码
+    cached_vcode = cache.get(keys.VCODE_K % phonenum)  # 取出缓存的验证码
 
     # 检查验证码是否正确
     if vcode and vcode == cached_vcode:
@@ -37,7 +38,7 @@ def submit_vcode(request):
         request.session['uid'] = user.id
         return render_json(user.to_dict())
     else:
-        return render_json(code=stat.VCODE_ERR)
+        raise stat.VcodeErr
 
 
 def get_profile(request):
@@ -53,9 +54,10 @@ def set_profile(request):
 
     # 检查数据有效性
     if not user_form.is_valid():
-        return render_json(user_form.errors, stat.USER_FORM_ERR)
+        raise stat.UserFormErr(user_form.errors)
+
     if not profile_form.is_valid():
-        return render_json(profile_form.errors, stat.PROFILE_FORM_ERR)
+        raise stat.ProfileFormErr(profile_form.errors)
 
     # 保存数据
     User.objects.filter(id=request.uid).update(**user_form.cleaned_data)

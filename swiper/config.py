@@ -2,6 +2,19 @@
 程序逻辑配置和第三方平台配置
 '''
 
+# Redis 配置
+REDIS = {
+    'host': 'localhost',
+    'port': 6379,
+    'db': 5,
+}
+
+
+# 反悔的配置
+REWIND_TIMES = 3  # 每天反悔次数
+REWIND_TIMEOUT = 60 * 5  # 反悔的超时时间
+
+
 # 云之讯短信平台配置
 YZX_SMS_API = 'https://open.ucpaas.com/ol/sms/sendsms'
 YZX_SMS_ARGS = {
