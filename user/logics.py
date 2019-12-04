@@ -1,5 +1,6 @@
 import os
 import random
+import logging
 
 import requests
 from django.core.cache import cache
@@ -9,6 +10,8 @@ from common import keys
 from user.models import User
 from libs.qn_cloud import upload_to_qiniu
 from tasks import celery_app
+
+inf_log = logging.getLogger('inf')
 
 
 def gen_random_code(length=6):
@@ -27,11 +30,12 @@ def send_vcode(mobile):
     用户 -> 自己服务器 -> 短信平台 -> 发送短信
     '''
     vcode = gen_random_code()  # 产生验证码
-    print('状态码:', vcode)
+    inf_log.debug('状态码: %s' % vcode)
 
     args = config.YZX_SMS_ARGS.copy()  # 浅拷贝全局配置
     args['param'] = vcode
     args['mobile'] = mobile
+    cache.set(keys.VCODE_K % mobile, vcode, 180)  # 将验证码写入缓存，保存 3 分钟
 
     # 调用第三方接口发送验证码
     response = requests.post(config.YZX_SMS_API, json=args)
