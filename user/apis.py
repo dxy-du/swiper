@@ -4,6 +4,7 @@ from django.core.cache import cache
 
 from common import stat
 from common import keys
+from libs.cache import rds
 from user import logics
 from user.models import User
 from user.models import Profile
@@ -49,8 +50,18 @@ def submit_vcode(request):
 
 def get_profile(request):
     '''获取个人资料'''
-    profile, _ = Profile.objects.get_or_create(id=request.uid)
-    return render_json(profile.to_dict())
+    key = keys.PROFILE_K % request.uid
+    result = rds.get(key)
+    print('从缓存获取: %s' % result)
+
+    if result is None:
+        profile, _ = Profile.objects.get_or_create(id=request.uid)
+        result = profile.to_dict()
+        print('从数据库获取: %s' % result)
+
+        rds.set(key, result, 1000)  # 将数据写入缓存
+        print('将数据写入缓存')
+    return render_json(result)
 
 
 def set_profile(request):
@@ -68,6 +79,10 @@ def set_profile(request):
     # 保存数据
     User.objects.filter(id=request.uid).update(**user_form.cleaned_data)
     Profile.objects.filter(id=request.uid).update(**profile_form.cleaned_data)
+
+    # 删除旧的缓存
+    key = keys.PROFILE_K % request.uid
+    rds.delete(key)
 
     # 文强 + 程超 的思路
     # user = User.objects.get(id=request.uid)

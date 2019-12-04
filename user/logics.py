@@ -35,7 +35,6 @@ def send_vcode(mobile):
     args = config.YZX_SMS_ARGS.copy()  # 浅拷贝全局配置
     args['param'] = vcode
     args['mobile'] = mobile
-    cache.set(keys.VCODE_K % mobile, vcode, 180)  # 将验证码写入缓存，保存 3 分钟
 
     # 调用第三方接口发送验证码
     response = requests.post(config.YZX_SMS_API, json=args)
