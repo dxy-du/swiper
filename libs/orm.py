@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.db.models import query
 
@@ -38,6 +40,19 @@ def save(self, force_insert=False, force_update=False, using=None,
     rds.set(model_key, self)
 
 
+def to_dict(self, *skip_fields):
+    '''将 model 对象的字段封装成 dict'''
+    attr_dict = {}
+    not_safe_types = (datetime.date, datetime.datetime)
+
+    for field in self._meta.fields:
+        name = field.attname
+        if name not in skip_fields:
+            value = getattr(self, name)
+            attr_dict[name] = str(value) if isinstance(value, not_safe_types) else value
+    return attr_dict
+
+
 def patch_model():
     '''通过 Monkey Patch 的方式为 Model 增加缓存处理'''
     query.QuerySet._get = query.QuerySet.get  # 将原 get 方法重命名
@@ -45,3 +60,5 @@ def patch_model():
 
     models.Model._save = models.Model.save  # 对原 save 方法重命名
     models.Model.save = save  # 用带缓存处理的 save 方法覆盖原 save 方法
+
+    models.Model.to_dict = to_dict
