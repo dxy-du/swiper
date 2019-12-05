@@ -57,6 +57,10 @@ def like_someone(uid, sid):
     # 将 sid 从自己的优先推荐队列中删除
     rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)
 
+    # 调整对方的滑动积分
+    score = config.HOT_RANK_SCORE['like']
+    rds.zincrby(keys.HOT_RANK_K, score, sid)
+
     # 检查对方有没有右滑或者上滑过自己
     if Swiped.is_liked(sid, uid):
         # 如果对方喜欢过自己，匹配成好友
@@ -73,6 +77,10 @@ def superlike_someone(uid, sid):
 
     # 将 sid 从自己的优先推荐队列中删除
     rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)
+
+    # 调整对方的滑动积分
+    score = config.HOT_RANK_SCORE['superlike']
+    rds.zincrby(keys.HOT_RANK_K, score, sid)
 
     # 检查对方有没有右滑或者上滑过自己
     liked_me = Swiped.is_liked(sid, uid)
@@ -95,6 +103,10 @@ def dislike_someone(uid, sid):
 
     # 将 sid 从自己的优先推荐队列中删除
     rds.lrem(keys.FIRST_RCMD_K % uid, 1, sid)
+
+    # 调整对方的滑动积分
+    score = config.HOT_RANK_SCORE['dislike']
+    rds.zincrby(keys.HOT_RANK_K, score, sid)
 
 
 def rewind_swipe(uid):
@@ -127,6 +139,10 @@ def rewind_swipe(uid):
     elif latest_swipe.stype == 'like':
         Friend.break_off(uid, latest_swipe.sid)
 
+    # 调整对方的滑动积分
+    score = config.HOT_RANK_SCORE[latest_swipe.stype]
+    rds.zincrby(keys.HOT_RANK_K, -score, latest_swipe.sid)
+
     # 将滑动记录删除
     latest_swipe.delete()
 
@@ -152,3 +168,26 @@ def users_liked_me(uid):
 
     users = User.objects.filter(id__in=uid_list)
     return users
+
+
+def get_top_n(num):
+    '''
+    获取人气排行前 N 的用户数据
+
+    先开发，再优化，再美化
+    '''
+    origin_data = rds.zrevrange(keys.HOT_RANK_K, 0, num - 1, withscores=True)  # 取出原始排行数据
+    cleaned = [[int(uid), int(score)] for uid, score in origin_data]  # 对原始数据进行清洗
+    uid_list = [uid for uid, _ in cleaned]  # 取出所有的 uid
+    users = User.objects.filter(id__in=uid_list)  # 取出所有用户
+    users = sorted(users, key=lambda user: uid_list.index(user.id))  # 调整 user 的顺序
+
+    # 组装数据
+    rank_data = {}
+    for idx, user in enumerate(users):
+        user_info = user.to_dict('phonenum', 'birthday', 'location', 'vip_id', 'vip_end')
+        user_info['score'] = cleaned[idx][1]
+        rank = idx + 1
+        rank_data[rank] = user_info
+
+    return rank_data

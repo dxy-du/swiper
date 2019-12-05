@@ -10,6 +10,13 @@ REDIS = {
 }
 
 
+HOT_RANK_SCORE = {
+    'like': 5,
+    'superlike': 7,
+    'dislike': -5,
+}
+
+
 # 反悔的配置
 REWIND_TIMES = 3  # 每天反悔次数
 REWIND_TIMEOUT = 60 * 5  # 反悔的超时时间

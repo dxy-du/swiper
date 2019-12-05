@@ -62,3 +62,9 @@ def friend_list(request):
     friends = User.objects.filter(id__in=fid_list)
     result = [frd.to_dict() for frd in friends]
     return render_json(result)
+
+
+def hot_rank(request):
+    '''查看人气排行榜'''
+    rank_data = logics.get_top_n(50)
+    return render_json(rank_data)
